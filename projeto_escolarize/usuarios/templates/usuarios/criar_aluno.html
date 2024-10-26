@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'escolarize/css/__.css' %}"> <!-- Usar a tag static -->
+
+<h2>Cadastrar Aluno</h2>
+<form class="form" method="post" action="{% url 'criar_aluno' %}">
+    {% csrf_token %}
+    <label for="identificador">Identificador:</label>
+    <input type="text" id="identificador" name="identificador" required>
+
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" name="nome" required>
+
+    <label for="idade">Idade:</label>
+    <input type="number" id="idade" name="idade" required>
+
+    <label for="serie">Série:</label>
+    <select id="serie" name="serie" required>
+        <option value="" disabled selected>Escolha uma série</option>
+        {% for serie in series %}
+            <option value="{{ serie.id }}">{{ serie.nome }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="pai_nome">Nome do Responsável:</label>
+    <input type="text" id="pai_nome" name="pai_nome" required>
+
+    <label for="materias">Matérias:</label>
+    <div id="materias-list">
+        <!-- As matérias serão inseridas aqui -->
+    </div>
+
+    <label for="professores">Professores:</label>
+    <div id="professores-list">
+        <!-- Lista de professores será inserida aqui -->
+    </div>
+
+    <button type="submit">Criar</button>
+</form>
+
+<script>
+    document.getElementById('serie').addEventListener('change', function() {
+        const serieId = this.value;
+        const professoresDiv = document.getElementById('professores-list');
+        const materiasDiv = document.getElementById('materias-list');
+        
+        professoresDiv.innerHTML = ''; // Limpa o conteúdo anterior
+        materiasDiv.innerHTML = ''; // Limpa o conteúdo anterior
+
+        if (serieId) {
+            // Faz a requisição AJAX para buscar os professores
+            fetch(`/get_professores?serie_id=${serieId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.professores.forEach(professor => {
+                        const div = document.createElement('div');
+                        div.textContent = professor.nome;
+                        professoresDiv.appendChild(div);
+                    });
+                })
+                .catch(error => console.error('Erro ao buscar professores:', error));
+
+            // Faz a requisição AJAX para buscar as matérias
+            fetch(`/get_materias?serie_id=${serieId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.materias.forEach(materia => {
+                        const div = document.createElement('div');
+                        div.textContent = materia.nome;
+                        materiasDiv.appendChild(div);
+                    });
+                })
+                .catch(error => console.error('Erro ao buscar matérias:', error));
+        }
+    });
+</script>
+{% endblock %}

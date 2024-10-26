@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'escolarize/css/styleLogin.css' %}">
+
+<title>Login</title>
+</head>
+<body>
+    <form  method="post" id="form-login" action="{% url 'login' %}">
+        {% csrf_token %}
+        <img src="{% static 'escolarize/images/LogoEscolarize.png' %}" alt="logotipo Escolarize">
+        <h1>Login</h1>
+        <div class="credentials">
+            <label for="username">Usuário:</label>
+            <input type="text" id="username" name="username" required><br>
+            <label for="password">Senha:</label>
+            <input type="password" id="password" name="password" required><br>
+        </div>
+        <button id="btn-login" type="submit">Logar</button>
+        {% if error %}
+        <p>{{ error }}</p>
+        {% endif %}
+    </form>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!-- templates/historico.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h2>Histórico Escolar</h2>
+
+    {% for bimestre, notas_bimestre in historico.items %}
+      <h3>{{ bimestre }}º Bimestre</h3>
+      <table class="table table-striped mt-3">
+        <thead>
+          <tr>
+            <th>Disciplina</th>
+            <th>Avaliação</th>
+            <th>Nota</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for nota in notas_bimestre %}
+            <tr>
+              <td>{{ nota.disciplina }}</td>
+              <td>{{ nota.avaliacao }}</td>
+              <td>{{ nota.nota }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endfor %}
+  </div>
+{% endblock %}

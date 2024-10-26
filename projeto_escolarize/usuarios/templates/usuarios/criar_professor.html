@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'escolarize/css/__.css' %}">
+
+<form class="form" method="POST" action="{% url 'criar_professor' %}">
+    {% csrf_token %}
+    <label for="identificador">Matricula:</label>
+    <input type="text" id="identificador" name="identificador" required>
+
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" name="nome" required>
+
+    <label for="series">Séries:</label>
+    <div id="series-list">
+        {% for serie in series %}
+            <div class="checkbox-wrapper">
+                <input type="checkbox" name="series" value="{{ serie.id }}" id="serie_{{ serie.id }}">
+                <label for="serie_{{ serie.id }}">{{ serie.nome }}</label>
+            </div>
+        {% endfor %}
+    </div>
+
+    <label for="materias">Matérias:</label>
+    <div id="materias-list">
+        {% for materia in materias %}
+            <div class="checkbox-wrapper">
+                <input type="checkbox" name="materias" value="{{ materia.id }}" id="materia_{{ materia.id }}">
+                <label for="materia_{{ materia.id }}">{{ materia.nome }}</label>
+            </div>
+        {% endfor %}
+    </div>
+
+    <button type="submit">Cadastrar</button>
+</form>
+<script>
+    // JavaScript para atualizar as matérias de acordo com a série selecionada
+    document.getElementById('serie').addEventListener('change', function() {
+        const serieId = this.value;
+        const materiasDiv = document.getElementById('materias-list');
+        materiasDiv.innerHTML = ''; // Limpa o conteúdo anterior
+
+        if (serieId) {
+            fetch(`/get_materias?serie_id=${serieId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.materias.forEach(materia => {
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.name = 'materias';
+                        checkbox.value = materia.id;
+                        checkbox.id = `materia_${materia.id}`;
+
+                        const label = document.createElement('label');
+                        label.htmlFor = `materia_${materia.id}`;
+                        label.textContent = materia.nome;
+
+                        const wrapperDiv = document.createElement('div');
+                        wrapperDiv.classList.add('checkbox-wrapper');
+                        wrapperDiv.appendChild(checkbox);
+                        wrapperDiv.appendChild(label);
+
+                        materiasDiv.appendChild(wrapperDiv);
+                    });
+                })
+                .catch(error => console.error('Erro ao buscar matérias:', error));
+        }
+    });
+</script>
+{% endblock %}

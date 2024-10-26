@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Alunos da Série {{ serie.nome }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <table>
+        <thead>
+            <tr>
+                <th>Nome do Aluno</th>
+                <th>Nota 1º Bimestre</th>
+                <th>Nota 2º Bimestre</th>
+                <th>Nota 3º Bimestre</th>
+                <th>Nota 4º Bimestre</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for aluno in alunos %}
+            <tr>
+                <td>{{ aluno.nome }}</td>
+                <td><input type="number" name="nota_1_{{ aluno.id }}" value="{{ aluno.nota_1 }}" min="0" max="10"></td>
+                <td><input type="number" name="nota_2_{{ aluno.id }}" value="{{ aluno.nota_2 }}" min="0" max="10"></td>
+                <td><input type="number" name="nota_3_{{ aluno.id }}" value="{{ aluno.nota_3 }}" min="0" max="10"></td>
+                <td><input type="number" name="nota_4_{{ aluno.id }}" value="{{ aluno.nota_4 }}" min="0" max="10"></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit">Salvar Notas</button>
+</form>
+{% endblock %}

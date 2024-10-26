@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <div class="alert alert-info">
+    <p>Debug info:</p>
+    <p>Aluno: {{ aluno.nome }}</p>
+    <p>Quantidade de notas: {{ notas|length }}</p>
+  </div>
+
+  <h2>Notas do Aluno - {{ aluno.nome }}</h2>
+
+  {% if mensagem_erro %}
+  <div class="alert alert-warning">{{ mensagem_erro }}</div>
+  {% else %}
+  <table class="table table-striped mt-4">
+    <thead>
+      <tr>
+        <th>Disciplina</th>
+        <th>Nota 1º BIM.</th>
+        <th>Nota 2º BIM.</th>
+        <th>Nota 3º BIM.</th>
+        <th>Nota 4º BIM.</th>
+        <th>Média Final</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for nota in notas %}
+      <tr>
+        <td>{{ nota.materia.nome }}</td>
+        <td>{{ nota.nota_1bimestre }}</td>
+        <td>{{ nota.nota_2bimestre }}</td>
+        <td>{{ nota.nota_3bimestre }}</td>
+        <td>{{ nota.nota_4bimestre }}</td>
+        <td>{{ nota.media }}</td>
+      </tr>
+      {% endfor %}
+      {% if notas|length == 0 %}
+      <tr>
+        <td colspan="6" class="text-center">Nenhuma nota cadastrada</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

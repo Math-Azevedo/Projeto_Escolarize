@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Suas Séries</h2>
+<ul id="series-list">
+    {% for serie in series %}
+    <li><a href="#" data-serie-id="{{ serie.id }}">{{ serie.nome }}</a></li>
+    {% endfor %}
+</ul>
+
+<div id="alunos-container">
+    <!-- A tabela de alunos será inserida aqui -->
+</div>
+
+<script>
+    document.querySelectorAll('#series-list a').forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            const serieId = this.dataset.serieId;
+            loadAlunos(serieId);
+        });
+    });
+
+    function loadAlunos(serieId) {
+        fetch(`/get_alunos_por_serie/?serie_id=${serieId}`)
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('alunos-container');
+                container.innerHTML = ''; // Limpa o conteúdo anterior
+                const table = document.createElement('table');
+
+                // Cria o cabeçalho da tabela
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                const headers = ['Aluno', '1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre', 'Média', 'Status', 'Ações'];
+                headers.forEach(text => {
+                    const th = document.createElement('th');
+                    th.textContent = text;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                // Ordena os alunos alfabeticamente pelo nome
+                data.alunos.sort((a, b) => a.nome.localeCompare(b.nome));
+
+                // Cria o corpo da tabela
+                const tbody = document.createElement('tbody');
+                data.alunos.forEach(aluno => {
+                    const row = document.createElement('tr');
+
+                    // Coluna do nome do aluno
+                    const nomeCell = document.createElement('td');
+                    nomeCell.textContent = aluno.nome;
+                    row.appendChild(nomeCell);
+
+                    // Colunas das notas do aluno
+                    let totalNotas = 0;
+                    let notaCount = 0;
+
+                    for (let i = 1; i <= 4; i++) {
+                        const notaCell = document.createElement('td');
+                        const notaInput = document.createElement('input');
+                        notaInput.type = 'number';
+                        notaInput.name = `nota_${i}_${aluno.id}`; // Nome correto
+                        notaInput.value = aluno[`nota_${i}bimestre`] || ''; // Certifique-se de usar a chave correta
+                        notaInput.min = "0";
+                        notaInput.max = "10";
+                        notaInput.step = "0.01"; // Permitir casas decimais se necessário
+                        
+                        if (aluno[`nota_${i}bimestre`]) {
+                            totalNotas += parseFloat(aluno[`nota_${i}bimestre`]);
+                            notaCount++;
+                        }
+
+                        notaCell.appendChild(notaInput);
+                        row.appendChild(notaCell);
+                    }
+
+                    // Coluna da média
+                    const mediaCell = document.createElement('td');
+                    const mediaValue = notaCount > 0 ? (totalNotas / notaCount) : 0;
+                    mediaCell.textContent = mediaValue.toFixed(2);
+                    row.appendChild(mediaCell);
+
+                    // Coluna do status (Aprovado/Reprovado)
+                    const statusCell = document.createElement('td');
+                    statusCell.textContent = mediaValue >= 6 ? 'Aprovado' : 'Reprovado';
+                    row.appendChild(statusCell);
+
+                    // Coluna de ações (Salvar e Alterar)
+                    const actionsCell = document.createElement('td');
+                    const saveButton = document.createElement('button');
+                    saveButton.textContent = 'Salvar';
+                    saveButton.onclick = () => saveNota(aluno.id, serieId); // Passa o serieId correto
+                    actionsCell.appendChild(saveButton);
+
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Alterar';
+                    editButton.onclick = () => editNota(aluno.id, serieId); // Passa o serieId correto
+                    actionsCell.appendChild(editButton);
+
+                    row.appendChild(actionsCell);
+                    tbody.appendChild(row);
+                });
+                table.appendChild(tbody);
+                container.appendChild(table);
+            })
+            .catch(error => console.error('Erro ao buscar alunos:', error));
+    }
+
+    function saveNota(alunoId, serieId) {
+    const nota1 = document.querySelector(`input[name="nota_1_${alunoId}"]`).value;
+    const nota2 = document.querySelector(`input[name="nota_2_${alunoId}"]`).value;
+    const nota3 = document.querySelector(`input[name="nota_3_${alunoId}"]`).value;
+    const nota4 = document.querySelector(`input[name="nota_4_${alunoId}"]`).value;
+
+    fetch('/save_notas/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')  // Certifique-se de que está enviando o CSRF token
+        },
+        body: JSON.stringify({
+            aluno_id: alunoId,
+            nota_1bimestre: nota1,  // Mude para a nomenclatura correta
+            nota_2bimestre: nota2,
+            nota_3bimestre: nota3,
+            nota_4bimestre: nota4
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Nota salva com sucesso');
+            loadAlunos(serieId);  // Recarrega os alunos da série correta
+        } else {
+            console.error('Erro ao salvar nota:', data.error);
+        }
+    })
+    .catch(error => console.error('Erro ao salvar nota:', error));
+}
+
+
+    function editNota(alunoId, serieId) {
+        // Lógica para editar a nota se necessário
+        saveNota(alunoId, serieId); // Poderia reutilizar a função saveNota
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}
