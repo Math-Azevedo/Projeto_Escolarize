@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-)bz0i3=q8233qww6nf&#q3s(69))*y)z4ppas_1hw66e^13+c3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'escolarize',
+    'crispy_forms'
     'usuarios',
 
 ]
@@ -79,9 +80,13 @@ WSGI_APPLICATION = 'projeto_escolarize.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres', 
+        'USER': 'postgres.zjjugldnktqrmfddbuhb', 
+        'PASSWORD': 'projetosdev',
+        'HOST': 'aws-0-sa-east-1.pooler.supabase.com', 
+        'PORT': '6543'
     }
 }
 
